@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>استكشاف المفردات الجديدة</title>
+    <style>
+        :root {
+            --primary-orange: #e67e22; /* برتقالي دافئ متناسق مع سلسلة العربية بين يديك */
+            --dark-orange: #d35400;
+            --cream-bg: #faf7f2; /* خلفية هادئة بلون الورق المريح للعين */
+            --card-front: #ffffff; /* خلفية بيضاء ناصعة للصور */
+            --card-back: #fffdf9;
+            --card-shadow: 0 4px 12px rgba(230, 126, 34, 0.08);
+            --card-hover-shadow: 0 8px 24px rgba(230, 126, 34, 0.18);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--cream-bg);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        h1 {
+            color: var(--dark-orange);
+            font-size: 2.2rem;
+            margin: 10px 0 40px 0;
+            text-align: center;
+            font-weight: 700;
+            position: relative;
+            padding-bottom: 12px;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background-color: var(--primary-orange);
+            border-radius: 2px;
+        }
+
+        /* حاوية الصفوف التفاعلية */
+        .rows-container {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            max-width: 1250px;
+            width: 100%;
+        }
+
+        /* الصف الأول (5 عناصر) */
+        .row-grid-5 {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            width: 100%;
+        }
+
+        /* الصف الثاني والثالث (6 عناصر) */
+        .row-grid-6 {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 20px;
+            width: 100%;
+        }
+
+        /* تجاوب التصميم مع الشاشات المختلفة */
+        @media (max-width: 1100px) {
+            .row-grid-5, .row-grid-6 {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 700px) {
+            .row-grid-5, .row-grid-6 {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+        }
+
+        /* تصميم الكروت التفاعلية ثلاثية الأبعاد */
+        .flip-card {
+            background-color: transparent;
+            height: 240px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+            border-radius: 14px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1.5px solid #f3e5d8;
+            box-sizing: border-box;
+            background-color: var(--card-front);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        /* فرض خلفية بيضاء نقية دائمًا للجهة الأمامية التي تعرض الصور */
+        .flip-card-front {
+            background-color: #ffffff !important;
+        }
+
+        .flip-card:hover .flip-card-front {
+            border-color: var(--primary-orange);
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .flip-card-front img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 8px;
+            pointer-events: none;
+            background-color: #ffffff; /* خلفية بيضاء للصورة نفسها */
+        }
+
+        .flip-card-back {
+            background-color: var(--card-back);
+            transform: rotateY(180deg);
+            padding: 20px;
+            border-color: var(--primary-orange);
+        }
+
+        /* تنسيق الكلمات بالحركات */
+        .word-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        /* زر تشغيل الصوت الدائري */
+        .sound-button {
+            background-color: var(--primary-orange);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 55px;
+            height: 55px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(230, 126, 34, 0.3);
+            transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+        }
+
+        .sound-button:hover {
+            background-color: var(--dark-orange);
+            transform: scale(1.08);
+            box-shadow: 0 6px 14px rgba(211, 84, 0, 0.4);
+        }
+
+        .sound-button:active {
+            transform: scale(0.95);
+        }
+
+        .sound-button svg {
+            width: 26px;
+            height: 26px;
+            fill: currentColor;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>استكشاف المفردات الجديدة</h1>
+
+    <div class="rows-container">
+        <!-- الصف الأول: 5 بطاقات -->
+        <div class="row-grid-5" id="row-1"></div>
+
+        <!-- الصف الثاني: 6 بطاقات -->
+        <div class="row-grid-6" id="row-2"></div>
+
+        <!-- الصف الثالث: 6 بطاقات -->
+        <div class="row-grid-6" id="row-3"></div>
+    </div>
+
+    <script>
+        // مصفوفة المفردات مصنفة بالصفوف ومطابقة لترتيب الكتاب من اليمين لليسار (RTL)
+        // ومربوطة بأسماء الصور العربية الصحيحة كما وردت في مجلد الصور الخاص بك
+        const bookRows = {
+            row1: [
+                { id: "fruit", text: "فَاكِهَة", speechText: "فَاكِهَهْ", img: "فاكهة.png" },
+                { id: "rice", text: "أَرُزّ", speechText: "أَرُزّْ", img: "أرز.png" },
+                { id: "fish", text: "سَمَك", speechText: "سَمَكْ", img: "سمك.png" },
+                { id: "bread", text: "خُبْز", speechText: "خُبْزْ", img: "خبز.png" },
+                { id: "eat", text: "يَأْكُل", speechText: "يَأْكُلْ", img: "يأكل.png" }
+            ],
+            row2: [
+                { id: "restaurant", text: "مَطْعَم", speechText: "مَطْعَمْ", img: "مطعم.png" },
+                { id: "dinner", text: "عَشَاء", speechText: "عَشَاءْ", img: "عشاء.png" },
+                { id: "lunch", text: "غَدَاء", speechText: "غَدَاءْ", img: "غداء.png" },
+                { id: "breakfast", text: "فُطُور", speechText: "فُطُورْ", img: "فطور.png" },
+                { id: "meals", text: "وَجَبَات", speechText: "وَجَبَاتْ", img: "وجبات.png" },
+                { id: "meal", text: "وَجْبَة", speechText: "وَجْبَهْ", img: "وجبة.png" }
+            ],
+            row3: [
+                { id: "weight", text: "وَزْن", speechText: "وَزْنْ", img: "وزن.png" },
+                { id: "few", text: "قَلِيل", speechText: "قَلِيلْ", img: "قليل.png" },
+                { id: "many", text: "كَثِير", speechText: "كَثِيرْ", img: "كثير.png" },
+                { id: "100kilo", text: "١٠٠ كِيل", speechText: "مِائَة كِيلْ", img: "100_كيل.png" },
+                { id: "fat", text: "سَمِين", speechText: "سَمِينْ", img: "سمين.png" },
+                { id: "thin", text: "نَحِيف", speechText: "نَحِيفْ", img: "نحيف.png" }
+            ]
+        };
+
+        // دالة إنشاء كرت Flip
+        function createCard(item) {
+            const card = document.createElement('div');
+            card.className = 'flip-card';
+            card.setAttribute('data-id', item.id);
+            
+            card.onclick = function(e) {
+                // منع قلب الكرت عند الضغط على زر الاستماع مباشرة
+                if (e.target.closest('.sound-button')) return;
+                this.classList.toggle('flipped');
+            };
+
+            card.innerHTML = `
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <img id="img-${item.id}" src="${item.img}" alt="${item.text}" onerror="fallbackImageExtension(this)">
+                    </div>
+                    <div class="flip-card-back">
+                        <div class="word-title">${item.text}</div>
+                        <button class="sound-button" onclick="speakWord('${item.speechText}')" title="استمع للنطق">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        // دالة الأمان التلقائي لمعالجة امتداد الصور في حال وجود صور بصيغة jpg بدلاً من png بجانب الملف
+        function fallbackImageExtension(imgElement) {
+            const currentSrc = imgElement.src;
+            if (currentSrc.endsWith('.png')) {
+                imgElement.src = currentSrc.replace('.png', '.jpg');
+            } else if (currentSrc.endsWith('.jpg')) {
+                imgElement.src = currentSrc.replace('.jpg', '.png');
+            }
+        }
+
+        // بناء وتوزيع البطاقات على الصفوف الثلاثة
+        const r1Container = document.getElementById('row-1');
+        const r2Container = document.getElementById('row-2');
+        const r3Container = document.getElementById('row-3');
+
+        bookRows.row1.forEach(item => r1Container.appendChild(createCard(item)));
+        bookRows.row2.forEach(item => r2Container.appendChild(createCard(item)));
+        bookRows.row3.forEach(item => r3Container.appendChild(createCard(item)));
+
+        // دالة نطق الكلمات بصوت رجل فصيح، معلم، هادئ وبطيء لغايات التعليم الفعال لغير الناطقين بالعربية
+        function speakWord(text) {
+            if ('speechSynthesis' in window) {
+                // إلغاء أي نطق جاري حالياً لتلافي التداخل
+                window.speechSynthesis.cancel();
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'ar-SA';
+                
+                // تحكم دقيق بالسرعة والنبرة للحصول على صوت تعليمي فصيح ومميز
+                utterance.rate = 0.50;  // بطيء جداً ومناسب لتمييز مخارج الحروف والمقاطع الصوتية
+                utterance.pitch = 0.90; // نبرة وقورة هادئة ومعبرة
+
+                // اختيار أفضل صوت لغة عربية متاح على جهاز المستخدم (يفضل الأصوات المتقدمة أو الرجولية إن وجدت)
+                const voices = window.speechSynthesis.getVoices();
+                const arabicMaleVoice = voices.find(voice => {
+                    const name = voice.name.toLowerCase();
+                    return voice.lang.startsWith('ar') && (name.includes('male') || name.includes('nafi') || name.includes('tarik') || name.includes('maged') || name.includes('hamed'));
+                });
+
+                if (arabicMaleVoice) {
+                    utterance.voice = arabicMaleVoice;
+                }
+
+                window.speechSynthesis.speak(utterance);
+            } else {
+                console.warn("المتصفح الحالي لا يدعم ميزة توليد الكلام الصوتي الذكي (TTS).");
+            }
+        }
+
+        // التجهيز المسبق للأصوات لضمان عمل الفلترة ببعض المتصفحات فور التحميل
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => {};
+        }
+    </script>
+</body>
+</html>
